@@ -2,6 +2,7 @@ import { Outlet, Link, useNavigate  } from "react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "~/lib/auth-store"
 import { supabase } from '../lib/supabase'
+import { Button, buttonVariants } from "@/components/ui/button"
 
 export async function clientLoader() {
   if (useAuthStore.getState().status === "loading") {
@@ -28,21 +29,29 @@ export default  function Layout() {
   const navigate = useNavigate()
 
   const UserMenu = () => (
-    <button 
+    <Button 
       onClick={ async () => {
         await useAuthStore.getState().signOut()
         queryClient.clear() 
         navigate('/')
       }}>
       로그아웃
-    </button> 
+    </Button> 
   )
 
   const GuestMenu = () => (
     <>
-      <Link to="/login">로그인</Link>
-      <Link to="/signup">회원가입</Link>
-      <button 
+      <Link 
+        to="/login"
+        className={buttonVariants()}>
+          로그인
+      </Link>
+      <Link 
+        to="/signup"
+        className={buttonVariants()}>
+        회원가입
+      </Link>
+      <Button 
         onClick={async () => {
           try {
             await githubSignIn() 
@@ -51,16 +60,22 @@ export default  function Layout() {
           }
         }}>
         GitHub 로그인
-      </button>
+      </Button>
     </>
   )
 
   return (
     <div>
       <header className="header bg-blue-900 text-white p-4">
-        <h1>애창곡</h1>
-        <nav>
-          {user ? UserMenu() : GuestMenu() }
+        <nav className="flex justify-between">
+          <Link 
+            to="/"
+            className="text-lg font-semibold">
+            애창곡
+          </Link>
+          <div>
+            {user ? UserMenu() : GuestMenu()}
+          </div>
         </nav>
       </header>
 

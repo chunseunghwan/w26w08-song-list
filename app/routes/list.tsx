@@ -1,9 +1,20 @@
-// import { useLoaderData, useNavigate, Link  } from 'react-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from "~/lib/auth-store"
 import type { Route } from "./+types/list"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { YoutubeIcon } from "@hugeicons/core-free-icons"
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,9 +25,6 @@ export function meta({}: Route.MetaArgs) {
 
 export default function List() {
   const user = useAuthStore(s => s.user)
-  // const githubSignIn = useAuthStore(s => s.githubSignIn)
-  const queryClient = useQueryClient()
-  // const navigate = useNavigate()
 
   const [title, setTitle] = useState("")
   const [artist, setArtist] = useState("")
@@ -39,6 +47,8 @@ export default function List() {
     // 다시 페이지를 방문했을 때 stale (시듬) 상태면 refetch됨
     staleTime: 1000 * 60 * 5, 
   })
+
+  const queryClient = useQueryClient()
 
   const deleteSongMutation = useMutation({
     mutationFn: async (songId: number) => {
@@ -129,25 +139,59 @@ export default function List() {
   return (
     <div>
       <div>
-        { addSongForm() }
+        {/* { addSongForm() } */}
 
-        <ul>
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
           {songs.map((song: any) => (
-            <li key={song.id}>
-              <strong>{song.title}</strong> - {song.artist || '(가수 없음)'}
-              <button
-                // 삭제 진행 중이면 버튼 비활성화
-                disabled={deleteSongMutation.isPending} 
-                onClick={() => {
-                  if (confirm(`'${song.title}' 노래를 삭제하시겠습니까?`)) {
-                    deleteSongMutation.mutate(song.id)
-                  }
-                }}>
-                삭제
-              </button>
-            </li>
+            <Card 
+              key={song.id}  
+              className="flex flex-col justify-between hover:shadow-md transition-shadow bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle
+                  className="text-xl font-bold tracking-tight line-clamp-1">
+                  {song.title}
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="flex-1 space-y-2 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">
+                  {song.artist || '가수 없음'}
+                </p>
+                {song.lyrics && (
+                  <p className="bg-muted p-2 rounded-md italic whitespace-pre-line mt-2">
+                    "{song.lyrics}"
+                  </p>
+                )}
+              </CardContent>
+
+              <CardFooter  className="flex justify-between pt-0">
+                <p className="text-yellow-500">
+                  ⭐️ {song.rating} / 5
+                </p>
+
+                <a
+                  href={`https://www.youtube.com/results?search_query=노래방+${song.title}+${song.artist}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className='inline-flex items-center'>
+                  <HugeiconsIcon icon={YoutubeIcon}/>
+                  노래방
+                </a>
+
+                <Button
+                  // 삭제 진행 중이면 버튼 비활성화
+                  disabled={deleteSongMutation.isPending} 
+                  onClick={() => {
+                    if (confirm(`'${song.title}' 노래를 삭제하시겠습니까?`)) {
+                      deleteSongMutation.mutate(song.id)
+                    }
+                  }}>
+                  삭제
+                </Button>
+              </CardFooter>
+            </Card>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   )
